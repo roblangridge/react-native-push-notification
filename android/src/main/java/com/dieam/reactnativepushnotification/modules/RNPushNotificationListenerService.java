@@ -118,6 +118,11 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
 
         Boolean isForeground = isApplicationInForeground();
 
+        if(isForeground){
+            Log.v(LOG_TAG, "Blocing Notification as App is in Foreground");
+            return
+        }
+
         RNPushNotificationJsDelivery jsDelivery = new RNPushNotificationJsDelivery(context);
         bundle.putBoolean("foreground", isForeground);
         bundle.putBoolean("userInteraction", false);
