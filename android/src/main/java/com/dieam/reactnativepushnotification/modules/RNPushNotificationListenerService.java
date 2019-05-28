@@ -41,7 +41,7 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
             bundle.putString("message", remoteNotification.getBody());
         }
 
-        for(Map.Entry<String, String> entry : message.getData().entrySet()) {
+        for (Map.Entry<String, String> entry : message.getData().entrySet()) {
             bundle.putString(entry.getKey(), entry.getValue());
         }
         JSONObject data = getPushData(bundle.getString("data"));
@@ -72,25 +72,29 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
 
         Log.v(LOG_TAG, "onMessageReceived: " + bundle);
 
-        // We need to run this on the main thread, as the React code assumes that is true.
-        // Namely, DevServerHelper constructs a Handler() without a Looper, which triggers:
+        // We need to run this on the main thread, as the React code assumes that is
+        // true.
+        // Namely, DevServerHelper constructs a Handler() without a Looper, which
+        // triggers:
         // "Can't create handler inside thread that has not called Looper.prepare()"
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
             public void run() {
                 // Construct and load our normal React JS code bundle
-                ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost().getReactInstanceManager();
+                ReactInstanceManager mReactInstanceManager = ((ReactApplication) getApplication()).getReactNativeHost()
+                        .getReactInstanceManager();
                 ReactContext context = mReactInstanceManager.getCurrentReactContext();
                 // If it's constructed, send a notification
                 if (context != null) {
                     handleRemotePushNotification((ReactApplicationContext) context, bundle);
                 } else {
                     // Otherwise wait for construction, then send the notification
-                    mReactInstanceManager.addReactInstanceEventListener(new ReactInstanceManager.ReactInstanceEventListener() {
-                        public void onReactContextInitialized(ReactContext context) {
-                            handleRemotePushNotification((ReactApplicationContext) context, bundle);
-                        }
-                    });
+                    mReactInstanceManager
+                            .addReactInstanceEventListener(new ReactInstanceManager.ReactInstanceEventListener() {
+                                public void onReactContextInitialized(ReactContext context) {
+                                    handleRemotePushNotification((ReactApplicationContext) context, bundle);
+                                }
+                            });
                     if (!mReactInstanceManager.hasStartedCreatingInitialContext()) {
                         // Construct it in the background
                         mReactInstanceManager.createReactContextInBackground();
@@ -110,7 +114,8 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
 
     private void handleRemotePushNotification(ReactApplicationContext context, Bundle bundle) {
 
-        // If notification ID is not provided by the user for push notification, generate one at random
+        // If notification ID is not provided by the user for push notification,
+        // generate one at random
         if (bundle.getString("id") == null) {
             Random randomNumberGenerator = new Random(System.currentTimeMillis());
             bundle.putString("id", String.valueOf(randomNumberGenerator.nextInt()));
@@ -118,9 +123,9 @@ public class RNPushNotificationListenerService extends FirebaseMessagingService 
 
         Boolean isForeground = isApplicationInForeground();
 
-        if(isForeground){
-            Log.v(LOG_TAG, "Blocing Notification as App is in Foreground");
-            return
+        if (isForeground == true) {
+            Log.v(LOG_TAG, "Blocking Notification as App is in Foreground");
+            return;
         }
 
         RNPushNotificationJsDelivery jsDelivery = new RNPushNotificationJsDelivery(context);
